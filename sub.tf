@@ -13,7 +13,7 @@ resource "aws_s3_bucket" "terraform_bucket" {
   }
 }
 
-# Variables (already in your code)
+# Variables
 variable "bucket_name" {
   description = "Base name for the S3 bucket"
   type        = string
