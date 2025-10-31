@@ -6,7 +6,7 @@ resource "aws_vpc" "main_vpc" {
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
-    Name = "Terraform-VPC-spacelift"
+    Name = "Terraform-VPC-spacelift-assg3"
   }
 }
 resource "aws_subnet" "public_subnet" {
