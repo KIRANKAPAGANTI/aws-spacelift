@@ -1,55 +1,95 @@
-variable "aws_region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "ap-south-1"
+provider "aws" {
+ 
+  region = var.aws_region
+ 
 }
-variable "vpc_cidr" {
-  description = "CIDR block for the VPC"
-  type        = string
-  default     = "10.0.0.0/16"
+ 
+resource "aws_vpc" "main_vpc" {
+ 
+  cidr_block           = var.vpc_cidr
+ 
+  enable_dns_support   = true
+ 
+  enable_dns_hostnames = true
+ 
+  tags = {
+ 
+    Name = var.vpc_name
+ 
+  }
+ 
 }
-variable "vpc_name" {
-  description = "Name of the VPC"
-  type        = string
-  default     = "Terraform-VPC"
+ 
+resource "aws_subnet" "public_subnet" {
+ 
+  vpc_id                  = aws_vpc.main_vpc.id
+ 
+  cidr_block              = var.subnet_cidr
+ 
+  map_public_ip_on_launch = true
+ 
+  availability_zone       = var.availability_zone
+ 
+  tags = {
+ 
+    Name = var.subnet_name
+ 
+  }
+ 
 }
-variable "subnet_cidr" {
-  description = "CIDR block for the public subnet"
-  type        = string
-  default     = "10.0.1.0/24"
+ 
+resource "aws_internet_gateway" "gw" {
+ 
+  vpc_id = aws_vpc.main_vpc.id
+ 
+  tags = {
+ 
+    Name = var.igw_name
+ 
+  }
+ 
 }
-variable "subnet_name" {
-  description = "Name of the public subnet"
-  type        = string
-  default     = "Terraform-public-subnet"
+ 
+resource "aws_route_table" "public_rt" {
+ 
+  vpc_id = aws_vpc.main_vpc.id
+ 
+  route {
+ 
+    cidr_block = "0.0.0.0/0"
+ 
+    gateway_id = aws_internet_gateway.gw.id
+ 
+  }
+ 
+  tags = {
+ 
+    Name = var.route_table_name
+ 
+  }
+ 
 }
-variable "availability_zone" {
-  description = "Availability zone for the subnet"
-  type        = string
-  default     = "ap-south-1a"
+ 
+resource "aws_route_table_association" "public_assoc" {
+ 
+  subnet_id      = aws_subnet.public_subnet.id
+ 
+  route_table_id = aws_route_table.public_rt.id
+ 
 }
-variable "igw_name" {
-  description = "Internet Gateway name"
-  type        = string
-  default     = "Terraform-internet-gateway"
-}
-variable "route_table_name" {
-  description = "Route table name"
-  type        = string
-  default     = "Terraform-route-table"
-}
-variable "bucket_name" {
-  description = "S3 bucket name (must be globally unique)"
-  type        = string
-  default     = "terraform-demo-bucket-assignment2-138245"
-}
-variable "bucket_tag_name" {
-  description = "Name tag for the S3 bucket"
-  type        = string
-  default     = "138160-NewBucket"
-}
-variable "environment" {
-  description = "Environment tag for the S3 bucket"
-  type        = string
-  default     = "Dev"
+ 
+resource "aws_s3_bucket" "terraform_bucket" {
+ 
+  bucket        = var.bucket_name
+ 
+  force_destroy = true
+ 
+  tags = {
+ 
+    Name        = var.bucket_tag_name
+ 
+    Environment = var.environment
+ 
+  }
+ 
 }
