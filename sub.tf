@@ -1,53 +1,31 @@
-variable "aws_region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "eu-north-1"
+# Generate a random suffix for uniqueness
+resource "random_id" "suffix" {
+  byte_length = 4
 }
-variable "vpc_cidr" {
-  description = "CIDR block for the VPC"
-  type        = string
-  default     = "10.0.0.0/16"
+
+# Create S3 bucket with unique name
+resource "aws_s3_bucket" "terraform_bucket" {
+  bucket = "${var.bucket_name}-${random_id.suffix.hex}"
+
+  tags = {
+    Name        = var.bucket_tag_name
+    Environment = var.environment
+  }
 }
-variable "vpc_name" {
-  description = "Name of the VPC"
-  type        = string
-  default     = "Terraform-VPC"
-}
-variable "subnet_cidr" {
-  description = "CIDR block for the public subnet"
-  type        = string
-  default     = "10.0.1.0/24"
-}
-variable "subnet_name" {
-  description = "Name of the public subnet"
-  type        = string
-  default     = "Terraform-public-subnet"
-}
-variable "availability_zone" {
-  description = "Availability zone for the subnet"
-  type        = string
-  default     = "eu-north-1a"
-}
-variable "igw_name" {
-  description = "Internet Gateway name"
-  type        = string
-  default     = "Terraform-internet-gateway"
-}
-variable "route_table_name" {
-  description = "Route table name"
-  type        = string
-  default     = "Terraform-route-table"
-}
+
+# Variables (already in your code)
 variable "bucket_name" {
-  description = "S3 bucket name (must be globally unique)"
+  description = "Base name for the S3 bucket"
   type        = string
-  default     = "terraform-demo-bucket-assignment2-138245"
+  default     = "terraform-demo-bucket-assignment2"
 }
+
 variable "bucket_tag_name" {
   description = "Name tag for the S3 bucket"
   type        = string
   default     = "138267-spacelift-NewBucket"
 }
+
 variable "environment" {
   description = "Environment tag for the S3 bucket"
   type        = string
