@@ -1,33 +1,29 @@
 provider "aws" {
-  region = var.aws_region
+  region = "eu-south-1"
 }
-
 resource "aws_vpc" "main_vpc" {
-  cidr_block           = var.vpc_cidr
+  cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
-    Name = var.vpc_name
+    Name = "Terraform-VPC-spacelift"
   }
 }
-
 resource "aws_subnet" "public_subnet" {
   vpc_id                  = aws_vpc.main_vpc.id
-  cidr_block              = var.subnet_cidr
+  cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
-  availability_zone       = var.availability_zone
+  availability_zone       = "ap-south-1a"
   tags = {
-    Name = var.subnet_name
+    Name = "Terraform-public-subnet-spacelift"
   }
 }
-
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main_vpc.id
   tags = {
-    Name = var.igw_name
+    Name = "Terraform-internet-spacelift"
   }
 }
-
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.main_vpc.id
   route {
@@ -35,12 +31,18 @@ resource "aws_route_table" "public_rt" {
     gateway_id = aws_internet_gateway.gw.id
   }
   tags = {
-    Name = var.route_table_name
+    Name = "Terraform-route-table"
   }
 }
-
 resource "aws_route_table_association" "public_assoc" {
   subnet_id      = aws_subnet.public_subnet.id
   route_table_id = aws_route_table.public_rt.id
 }
-``
+resource "aws_s3_bucket" "terraform_bucket" {
+  bucket        = "138160-spacelift-terraform-demo-bucket-assignment3"
+  force_destroy = true
+  tags = {
+    Name        = "Terraform-S3-bucket"
+    Environment = "Dev"
+  }
+}
